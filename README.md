@@ -1,8 +1,21 @@
 # QUACKD Website
 
-A polished static landing page for **QUACKD**, a community-facing project inspired by the open-source robotics project [`quackd`](https://github.com/rokbenko/quackd). The website explains the relationship between a small robot, a language-model-driven planning layer, and the wider community around the idea.
+A polished static landing page for **QUACKD**, a community-facing project and supporter of the QUACKD Solana meme coin. The project is inspired by the open-source robotics project [`quackd`](https://github.com/rokbenko/quackd), connecting a small robot story, a language-model-driven planning layer, and the wider community around the idea.
 
-> **Important distinction:** This repository is a presentation website. It is not the original `quackd` robotics runtime, it does not control a robot, and it does not provide an AI agent or blockchain contract implementation.
+> **Project scope:** This repository is the website for the QUACKD community meme coin and its robotics-inspired culture. It is not the original `quackd` robotics runtime, it does not control a robot, and it does not provide an AI agent or blockchain contract implementation.
+
+## QUACKD Community Meme Coin
+
+This project explicitly supports and promotes **$QUACKD**, a community meme coin on Solana. The token is part of the identity and community layer represented by this website.
+
+| Token detail | Value |
+|---|---|
+| Name | QUACKD |
+| Symbol | `$QUACKD` |
+| Network | Solana |
+| Contract address | `GMogeMjrWFaEceasCPathoibjAh8qwhTC3Chw4Bfpump` |
+
+The contract address above is displayed publicly on the website as the community-provided token reference. Always verify the address independently before taking any on-chain action, and do your own research before participating.
 
 ## Live Website
 
@@ -19,7 +32,7 @@ The website has four purposes:
 1. **Explain the concept.** It presents the idea of giving a small robot a higher-level interface for natural-language goals.
 2. **Connect the story to the source project.** It links visitors to the original open-source `quackd` repository and distinguishes the original engineering project from this community-facing website.
 3. **Provide a clear visual identity.** It uses a robot-duck visual system, responsive sections, motion, and interactive mission examples.
-4. **Give the community a reliable starting point.** It provides links to the source project, public project references, and the website's explanatory content.
+4. **Support the community meme coin.** It gives $QUACKD a clear identity, displays its Solana contract address, and provides a public home for the flock.
 
 The page uses illustrative language such as “Give the Meme Duck a Brain.” That language is a communication device, not a claim that this repository implements a production robot brain.
 
@@ -168,9 +181,9 @@ The `BASE_PATH` is essential because this is a project site hosted below the `ta
 Because this website references robotics, artificial intelligence, and a token community, every public claim should be reviewed before it is published.
 
 - Do not claim that the website controls a physical robot unless a real integration exists and has been tested.
-- Do not imply that the community token is the official `quackd` project, its official currency, or an endorsement by the original author.
+- State clearly that this website supports the QUACKD community meme coin while keeping its relationship to the original robotics repository transparent.
 - Do not publish a wallet private key, seed phrase, API key, or other secret.
-- Treat the displayed contract address as public information, but verify it before changing the page.
+- Treat the displayed contract address as public information, verify it before changing the page, and keep it consistent across the website and documentation.
 - Link technical statements to the original project's documentation rather than presenting this landing page as the source of truth.
 - Mark roadmap items as proposals unless they are already implemented.
 - Check the original repository and the founder's public profile before describing a new update as current.
@@ -185,7 +198,7 @@ The founder's public profile is [`@rokbenko`](https://x.com/rokbenko). It is use
 
 This website is a separate presentation project. Before distributing it as an open-source package, add the intended license and confirm that all visual assets and copied text are licensed for redistribution.
 
-The original `quackd` project's license and attribution requirements are defined in its own repository and apply to that project, not automatically to this website.
+The original `quackd` project's license and attribution requirements are defined in its own repository and apply to that project, not automatically to this website. Supporting the QUACKD community meme coin does not by itself claim that the original robotics author endorses the token; the website should describe that relationship accurately.
 
 ## References
 
