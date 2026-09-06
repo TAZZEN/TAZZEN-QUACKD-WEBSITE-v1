@@ -1,5 +1,5 @@
-import { useState, type ReactNode } from 'react';
-import { AnimatePresence, motion } from 'framer-motion';
+import { useEffect, useRef, useState, type ReactNode } from 'react';
+import { AnimatePresence, motion, useReducedMotion } from 'framer-motion';
 import {
   ArrowDown,
   ArrowUpRight,
@@ -39,18 +39,36 @@ const commandResponses: Record<string, string> = {
   'Quack loudly': 'QUACK QUACK QUACK. Audio output: maximum personality.',
 };
 
+const EASE_OUT = [0.22, 1, 0.36, 1] as const;
+
+function useMedia(query: string) {
+  const [matches, setMatches] = useState(false);
+
+  useEffect(() => {
+    const media = window.matchMedia(query);
+    const update = () => setMatches(media.matches);
+    update();
+    media.addEventListener('change', update);
+    return () => media.removeEventListener('change', update);
+  }, [query]);
+
+  return matches;
+}
+
 function scrollToId(id: string) {
-  document.getElementById(id)?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+  const behavior = window.matchMedia('(prefers-reduced-motion: reduce)').matches ? 'auto' : 'smooth';
+  document.getElementById(id)?.scrollIntoView({ behavior, block: 'start' });
 }
 
 function Reveal({ children, delay = 0, className = '' }: { children: ReactNode; delay?: number; className?: string }) {
+  const reduceMotion = useReducedMotion();
   return (
     <motion.div
       className={className}
-      initial={{ opacity: 0, y: 22 }}
-      whileInView={{ opacity: 1, y: 0 }}
-      viewport={{ once: true, amount: 0.14 }}
-      transition={{ duration: 0.65, delay, ease: [0.22, 1, 0.36, 1] }}
+      initial={reduceMotion ? false : { opacity: 0, y: 16 }}
+      whileInView={reduceMotion ? undefined : { opacity: 1, y: 0 }}
+      viewport={{ once: true, amount: 0.18 }}
+      transition={{ duration: 0.52, delay: reduceMotion ? 0 : delay, ease: EASE_OUT }}
     >
       {children}
     </motion.div>
@@ -72,32 +90,37 @@ function DuckMark({ small = false }: { small?: boolean }) {
 }
 
 function Mascot() {
+  const reduceMotion = useReducedMotion();
+  const isMobile = useMedia('(max-width: 767px)');
+  const shouldIdle = !reduceMotion && !isMobile;
   const particles = [
     { x: '9%', y: '24%', delay: 0, icon: Heart },
     { x: '86%', y: '15%', delay: 1.2, icon: Sparkles },
     { x: '90%', y: '68%', delay: 2, icon: Heart },
     { x: '14%', y: '76%', delay: 1.5, icon: Sparkles },
   ];
+  const visibleParticles = isMobile ? particles.slice(0, 2) : particles;
 
   return (
     <div className="mascot-stage relative mx-auto h-[350px] w-full max-w-[510px] sm:h-[500px]" aria-label="Animated robot duck mascot">
       <div className="mascot-halo absolute left-1/2 top-1/2 h-[245px] w-[245px] -translate-x-1/2 -translate-y-1/2 rounded-full" />
       <div className="mascot-orbit absolute inset-[7%] rounded-[44%] border border-dashed border-[#b691ec]/35" />
       <div className="mascot-orbit absolute inset-[16%] rounded-[42%] border border-[#f4b8cf]/45" />
-      {particles.map(({ x, y, delay, icon: Icon }, index) => (
+      {visibleParticles.map(({ x, y, delay, icon: Icon }, index) => (
         <motion.span
           key={index}
-          className="absolute z-10 text-[#db7ca8]"
+          className={`mascot-particle absolute z-10 text-[#db7ca8] ${shouldIdle ? 'is-idle' : ''}`}
           style={{ left: x, top: y }}
-          animate={{ opacity: [0.38, 1, 0.38], y: [0, -9, 0], rotate: [-8, 8, -8] }}
+          initial={{ opacity: shouldIdle ? 0.38 : 0.65 }}
+          animate={shouldIdle ? { opacity: [0.38, 1, 0.38], y: [0, -9, 0], rotate: [-8, 8, -8] } : undefined}
           transition={{ duration: 3.4, repeat: Infinity, delay, ease: 'easeInOut' }}
         >
           <Icon size={index % 2 ? 18 : 21} fill={index % 2 ? 'none' : 'currentColor'} />
         </motion.span>
       ))}
       <motion.div
-        className="mascot-image-wrap absolute left-1/2 top-[3%] w-[min(75vw,360px)] -translate-x-1/2 overflow-hidden rounded-[42%] shadow-[0_26px_55px_rgba(119,83,165,.18)]"
-        animate={{ y: [0, -9, 0], rotate: [-1.2, 1.2, -1.2] }}
+        className={`mascot-image-wrap absolute left-1/2 top-[3%] w-[min(75vw,360px)] -translate-x-1/2 overflow-hidden rounded-[42%] shadow-[0_26px_55px_rgba(119,83,165,.18)] ${shouldIdle ? 'is-idle' : ''}`}
+        animate={shouldIdle ? { y: [0, -9, 0], rotate: [-1.2, 1.2, -1.2] } : undefined}
         transition={{ duration: 5.8, repeat: Infinity, ease: 'easeInOut' }}
       >
         <img src={duckAsset} alt="Glossy lavender QUACKD robot duck with a yellow eye and articulated legs" className="block h-auto w-full" />
@@ -111,6 +134,24 @@ function Mascot() {
 
 function Nav() {
   const [open, setOpen] = useState(false);
+  const [scrolled, setScrolled] = useState(false);
+
+  useEffect(() => {
+    const update = () => setScrolled(window.scrollY > 12);
+    update();
+    window.addEventListener('scroll', update, { passive: true });
+    return () => window.removeEventListener('scroll', update);
+  }, []);
+
+  useEffect(() => {
+    if (!open) return;
+    const closeOnEscape = (event: KeyboardEvent) => {
+      if (event.key === 'Escape') setOpen(false);
+    };
+    window.addEventListener('keydown', closeOnEscape);
+    return () => window.removeEventListener('keydown', closeOnEscape);
+  }, [open]);
+
   const navigate = (id: string) => {
     setOpen(false);
     scrollToId(id);
@@ -118,7 +159,7 @@ function Nav() {
 
   return (
     <header className="fixed left-0 right-0 top-0 z-50 px-3 pt-3 sm:px-6 sm:pt-5">
-      <nav className="nav-shell mx-auto flex max-w-[1220px] items-center justify-between rounded-[20px] px-4 py-3 sm:px-5" aria-label="Main navigation">
+      <nav className={`nav-shell mx-auto flex max-w-[1220px] items-center justify-between rounded-[20px] px-4 py-3 sm:px-5 ${scrolled ? 'nav-shell-scrolled' : ''}`} aria-label="Main navigation">
         <button type="button" onClick={() => navigate('home')} className="focus-ring flex items-center gap-2 text-left" data-testid="button-brand-home">
           <span className="flex h-8 w-8 items-center justify-center rounded-xl bg-[#eee3ff]"><DuckMark small /></span>
           <span className="font-mono text-sm font-medium tracking-[.18em] text-[#3e294e]">QUACKD</span>
@@ -132,12 +173,12 @@ function Nav() {
           <a href="https://github.com/rokbenko/quackd" target="_blank" rel="noreferrer" className="focus-ring social-button hidden rounded-xl p-2 sm:block" aria-label="QUACKD on GitHub" data-testid="link-nav-github"><Github size={17} /></a>
           <a href="https://x.com/rokbenko" target="_blank" rel="noreferrer" className="focus-ring social-button hidden rounded-xl p-2 sm:block" aria-label="QUACKD on X" data-testid="link-nav-x"><X size={17} /></a>
           <button type="button" onClick={() => navigate('token')} className="focus-ring button-yellow hidden rounded-xl px-4 py-2.5 text-[11px] font-bold uppercase tracking-[.08em] sm:block" data-testid="button-nav-buy">Buy $QUACKD <ArrowUpRight className="ml-1 inline" size={14} /></button>
-          <button type="button" onClick={() => setOpen((current) => !current)} className="focus-ring nav-menu rounded-xl p-2 md:hidden" aria-label={open ? 'Close menu' : 'Open menu'} aria-expanded={open} data-testid="button-mobile-menu">{open ? <X size={20} /> : <Menu size={20} />}</button>
+          <button type="button" onClick={() => setOpen((current) => !current)} className="focus-ring nav-menu rounded-xl p-2 md:hidden" aria-label={open ? 'Close menu' : 'Open menu'} aria-expanded={open} aria-controls="mobile-menu" data-testid="button-mobile-menu">{open ? <X size={20} /> : <Menu size={20} />}</button>
         </div>
       </nav>
       <AnimatePresence>
         {open && (
-          <motion.div initial={{ opacity: 0, y: -8 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -8 }} className="nav-shell mx-auto mt-2 max-w-[1220px] rounded-2xl p-3 md:hidden">
+          <motion.div id="mobile-menu" initial={{ opacity: 0, y: -6, scale: .98, clipPath: 'inset(0 0 100% 0 round 16px)' }} animate={{ opacity: 1, y: 0, scale: 1, clipPath: 'inset(0 0 0% 0 round 16px)' }} exit={{ opacity: 0, y: -6, scale: .98, clipPath: 'inset(0 0 100% 0 round 16px)' }} transition={{ duration: .22, ease: EASE_OUT }} className="nav-shell mx-auto mt-2 max-w-[1220px] rounded-2xl p-3 md:hidden">
             {navItems.map(([label, id]) => <button key={id} type="button" onClick={() => navigate(id)} className="focus-ring nav-mobile-link block w-full rounded-xl px-3 py-3 text-left text-xs font-bold uppercase tracking-[.13em]" data-testid={`link-mobile-${id}`}>{label}</button>)}
             <button type="button" onClick={() => navigate('token')} className="button-yellow mt-2 w-full rounded-xl px-4 py-3 text-xs font-bold uppercase tracking-[.1em]" data-testid="button-mobile-buy">Buy $QUACKD</button>
           </motion.div>
@@ -149,11 +190,18 @@ function Nav() {
 
 function ContractCard() {
   const [copied, setCopied] = useState(false);
+  const copiedTimer = useRef<number | null>(null);
+
+  useEffect(() => () => {
+    if (copiedTimer.current) window.clearTimeout(copiedTimer.current);
+  }, []);
+
   const copyContract = async () => {
     try {
       await navigator.clipboard?.writeText(CONTRACT);
       setCopied(true);
-      window.setTimeout(() => setCopied(false), 2400);
+      if (copiedTimer.current) window.clearTimeout(copiedTimer.current);
+      copiedTimer.current = window.setTimeout(() => setCopied(false), 2400);
     } catch {
       setCopied(false);
     }
@@ -184,10 +232,18 @@ function SectionLabel({ number, children }: { number: string; children: ReactNod
 function App() {
   const [activeCommand, setActiveCommand] = useState('Find the ball');
   const [missionRunning, setMissionRunning] = useState(false);
+  const missionTimer = useRef<number | null>(null);
+  const reduceMotion = useReducedMotion();
+
+  useEffect(() => () => {
+    if (missionTimer.current) window.clearTimeout(missionTimer.current);
+  }, []);
+
   const runMission = (command: string) => {
+    if (missionTimer.current) window.clearTimeout(missionTimer.current);
     setActiveCommand(command);
     setMissionRunning(true);
-    window.setTimeout(() => setMissionRunning(false), 700);
+    missionTimer.current = window.setTimeout(() => setMissionRunning(false), 700);
   };
 
   return (
@@ -252,7 +308,7 @@ function App() {
       </section>
 
       <section id="mission" className="section-wrap scroll-mt-28 py-20 sm:py-32">
-        <Reveal><div className="grid gap-8 lg:grid-cols-[.75fr_1.25fr] lg:items-stretch"><div className="mission-yellow flex flex-col justify-between rounded-3xl p-7 text-[#4a3527] sm:p-9"><div><div className="mb-6 flex items-center gap-2 font-mono text-[10px] font-medium uppercase tracking-[.15em]"><Radio size={15} /> Live interface</div><h2 className="max-w-sm text-4xl font-bold leading-[.94] tracking-[-.06em] sm:text-5xl">Tell the duck what to do.</h2><p className="mt-5 max-w-sm text-sm leading-6 text-[#795c43]">Pick a mission. QUACKD will handle the rest. This is what a small robot with a big brain feels like.</p></div><div className="mt-14 flex items-center gap-3 border-t border-[#684a2b]/15 pt-5 font-mono text-[10px] uppercase tracking-[.12em]"><span className="pulse-dot h-2 w-2 rounded-full bg-[#684a2b]" /> brain status: ready</div></div><div className="soft-card rounded-3xl p-5 sm:p-8"><div className="mb-7 flex items-center justify-between"><div><span className="eyebrow">Mission panel</span><h3 className="mt-2 text-xl font-bold text-[#4c3459]">What should I do?</h3></div><div className="flex h-10 w-10 items-center justify-center rounded-full border border-[#dbc7e8] bg-[#f6ecff]"><DuckMark small /></div></div><div className="grid gap-2 sm:grid-cols-2">{Object.keys(commandResponses).map((command) => <button key={command} type="button" onClick={() => runMission(command)} className={`focus-ring mission-button group flex items-center justify-between rounded-xl border p-3.5 text-left text-sm transition-all ${activeCommand === command ? 'mission-active' : ''}`} data-testid={`button-mission-${command.toLowerCase().replaceAll(' ', '-')}`}><span>{command}</span><ArrowUpRight className={`transition-transform group-hover:-translate-y-0.5 group-hover:translate-x-0.5 ${activeCommand === command ? 'text-[#b65c86]' : 'text-[#a990ac]'}`} size={15} /></button>)}</div><div className="response-box mt-5 min-h-[94px] rounded-xl p-4 font-mono text-[11px] leading-6"><div className="mb-1 text-[#9d829f]">quackd.response</div><AnimatePresence mode="wait"><motion.p key={activeCommand} initial={{ opacity: 0, y: 4 }} animate={{ opacity: 1, y: 0 }} className={missionRunning ? 'text-[#b9822a]' : 'text-[#8567a2]'} data-testid="text-mission-response">{missionRunning ? 'Thinking...' : commandResponses[activeCommand]}</motion.p></AnimatePresence></div></div></div></Reveal>
+        <Reveal><div className="grid gap-8 lg:grid-cols-[.75fr_1.25fr] lg:items-stretch"><div className="mission-yellow flex flex-col justify-between rounded-3xl p-7 text-[#4a3527] sm:p-9"><div><div className="mb-6 flex items-center gap-2 font-mono text-[10px] font-medium uppercase tracking-[.15em]"><Radio size={15} /> Live interface</div><h2 className="max-w-sm text-4xl font-bold leading-[.94] tracking-[-.06em] sm:text-5xl">Tell the duck what to do.</h2><p className="mt-5 max-w-sm text-sm leading-6 text-[#795c43]">Pick a mission. QUACKD will handle the rest. This is what a small robot with a big brain feels like.</p></div><div className="mt-14 flex items-center gap-3 border-t border-[#684a2b]/15 pt-5 font-mono text-[10px] uppercase tracking-[.12em]"><span className="pulse-dot h-2 w-2 rounded-full bg-[#684a2b]" /> brain status: ready</div></div><div className="soft-card rounded-3xl p-5 sm:p-8"><div className="mb-7 flex items-center justify-between"><div><span className="eyebrow">Mission panel</span><h3 className="mt-2 text-xl font-bold text-[#4c3459]">What should I do?</h3></div><div className="flex h-10 w-10 items-center justify-center rounded-full border border-[#dbc7e8] bg-[#f6ecff]"><DuckMark small /></div></div><div className="grid gap-2 sm:grid-cols-2">{Object.keys(commandResponses).map((command) => <button key={command} type="button" onClick={() => runMission(command)} className={`focus-ring mission-button group flex items-center justify-between rounded-xl border p-3.5 text-left text-sm transition-all ${activeCommand === command ? 'mission-active' : ''}`} data-testid={`button-mission-${command.toLowerCase().replaceAll(' ', '-')}` }><span>{command}</span><ArrowUpRight className={`transition-transform group-hover:-translate-y-0.5 group-hover:translate-x-0.5 ${activeCommand === command ? 'text-[#b65c86]' : 'text-[#a990ac]'}`} size={15} /></button>)}</div><div className="response-box mt-5 min-h-[94px] rounded-xl p-4 font-mono text-[11px] leading-6" aria-live="polite" aria-busy={missionRunning}><div className="mb-1 text-[#9d829f]">quackd.response</div><AnimatePresence mode="wait"><motion.p key={`${activeCommand}-${missionRunning ? 'thinking' : 'done'}`} initial={reduceMotion ? false : { opacity: 0, y: 4 }} animate={{ opacity: 1, y: 0 }} exit={reduceMotion ? undefined : { opacity: 0, y: -3 }} transition={{ duration: .18, ease: EASE_OUT }} className={missionRunning ? 'text-[#b9822a]' : 'text-[#8567a2]'} data-testid="text-mission-response">{missionRunning ? 'Thinking...' : commandResponses[activeCommand]}</motion.p></AnimatePresence></div></div></div></Reveal>
       </section>
 
       <section id="community" className="scroll-mt-28 pb-20 sm:pb-32">
