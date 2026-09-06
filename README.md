@@ -1,212 +1,199 @@
 # QUACKD Website
 
-A polished static landing page for **QUACKD**, a community-facing project and supporter of the QUACKD Solana meme coin. The project is inspired by the open-source robotics project [`quackd`](https://github.com/rokbenko/quackd), connecting a small robot story, a language-model-driven planning layer, and the wider community around the idea.
+The public website for the **QUACKD community meme coin**, inspired by the open-source robotics project [`quackd`](https://github.com/rokbenko/quackd).
 
-> **Project scope:** This repository is the website for the QUACKD community meme coin and its robotics-inspired culture. It is not the original `quackd` robotics runtime, it does not control a robot, and it does not provide an AI agent or blockchain contract implementation.
+This repository contains a static React application. It is responsible for the public presentation layer: project narrative, token information, community links, and an interactive demonstration of the robotics concept. It is not the source code of the original robotics runtime and does not operate a physical robot.
 
-## QUACKD Community Meme Coin
+## Production site
 
-This project explicitly supports and promotes **$QUACKD**, a community meme coin on Solana. The token is part of the identity and community layer represented by this website.
+<https://tazzen.github.io/TAZZEN-QUACKD-WEBSITE-v1/>
 
-| Token detail | Value |
+## What this repository contains
+
+The site combines two related but distinct parts of the QUACKD identity:
+
+- **The community layer:** the website supports the QUACKD community meme coin and publishes its public token reference.
+- **The robotics story:** the site explains the idea behind `quackd`, an open-source project that connects natural-language goals with capabilities already provided by a robot's controllers.
+
+The distinction is intentional. This repository presents the community and its concept; [`rokbenko/quackd`](https://github.com/rokbenko/quackd) is the technical source of truth for the robotics software.
+
+## Token reference
+
+| Field | Value |
 |---|---|
 | Name | QUACKD |
 | Symbol | `$QUACKD` |
 | Network | Solana |
 | Contract address | `GMogeMjrWFaEceasCPathoibjAh8qwhTC3Chw4Bfpump` |
 
-The contract address above is displayed publicly on the website as the community-provided token reference. Always verify the address independently before taking any on-chain action, and do your own research before participating.
+The address is included as a public project reference. Verify the address independently before performing any on-chain transaction and conduct your own research.
 
-## Live Website
+## Technical relationship to `quackd`
 
-The deployed website is available at:
+The original `quackd` project is an open-source robotics system built around a clear separation of responsibilities:
 
-**<https://tazzen.github.io/TAZZEN-QUACKD-WEBSITE-v1/>**
+| Layer | Responsibility |
+|---|---|
+| Robot controllers | Execute body-specific skills such as balance, walking, grasping, or driving |
+| Steering loop | Convert perception and state into an approach or movement plan |
+| Deliberation | Select the next high-level action from a natural-language goal |
 
-Every push to `main` triggers the GitHub Pages workflow in [`.github/workflows/deploy-pages.yml`](.github/workflows/deploy-pages.yml).
+The original project uses robot adapters and manifests to describe available sensors, capabilities, verbs, limits, and safety authority. It also provides simulation and provider integrations for development and testing.
 
-## Project Purpose
+This website references that model for communication purposes. It does not ship the original Python package, robot adapters, simulator, provider integrations, or safety executor.
 
-The website has four purposes:
-
-1. **Explain the concept.** It presents the idea of giving a small robot a higher-level interface for natural-language goals.
-2. **Connect the story to the source project.** It links visitors to the original open-source `quackd` repository and distinguishes the original engineering project from this community-facing website.
-3. **Provide a clear visual identity.** It uses a robot-duck visual system, responsive sections, motion, and interactive mission examples.
-4. **Support the community meme coin.** It gives $QUACKD a clear identity, displays its Solana contract address, and provides a public home for the flock.
-
-The page uses illustrative language such as “Give the Meme Duck a Brain.” That language is a communication device, not a claim that this repository implements a production robot brain.
-
-## Relationship to the Original `quackd` Project
-
-The original [`rokbenko/quackd`](https://github.com/rokbenko/quackd) project describes itself as an open-source bridge between **human-level goals** and a robot's existing low-level capabilities. Its central design separates three responsibilities:
-
-| Layer | Responsibility | Example |
-|---|---|---|
-| Robot reflexes | Execute balance, walking, grasping, driving, or other body-specific skills | A robot controller maintains balance or performs a learned motion |
-| Steering | Turn perception and state into an approach or movement plan | Navigate toward a detected ball |
-| Deliberation | Select the next high-level action from a natural-language goal | Interpret “find the ball and kick it” |
-
-The original project uses robot adapters and manifests to describe the capabilities, sensors, verbs, limits, and safety authority of a connected body. It supports simulation and multiple integration paths, while keeping the robot's own controllers responsible for low-level movement.
-
-This website borrows the **conceptual vocabulary** of that architecture for storytelling. It does not include the Python package, robot adapters, simulator, provider integrations, or safety executor from the original project. Visitors who want to understand or run the actual robotics system should use the original repository and its documentation.
-
-## Repository Structure
+## Repository layout
 
 ```text
-TAZZEN-QUACKD-WEBSITE-v1/
-├── .github/
-│   └── workflows/
-│       └── deploy-pages.yml       # Automated GitHub Pages build and deployment
+.
+├── .github/workflows/deploy-pages.yml  # CI build and GitHub Pages deployment
 ├── public/
-│   ├── assets/                    # Static visual assets used by the page
-│   ├── favicon.svg                # Browser tab icon
-│   └── robots.txt                 # Search-engine crawling instructions
+│   ├── assets/                         # Static images served by the site
+│   ├── favicon.svg                     # Browser icon
+│   └── robots.txt                      # Crawler instructions
 ├── src/
 │   ├── components/
-│   │   ├── ui/                    # Reusable Radix-based UI primitives
-│   │   └── error-boundary.tsx     # Prevents uncaught React errors from breaking the page silently
-│   ├── hooks/
-│   │   ├── use-mobile.tsx         # Mobile viewport behavior
-│   │   └── use-toast.ts           # Toast state and actions
-│   ├── lib/
-│   │   └── utils.ts               # Shared utility helpers, including class merging
-│   ├── pages/
-│   │   └── not-found.tsx          # Fallback page component
-│   ├── App.tsx                    # Main page composition and interactive sections
-│   ├── index.css                  # Global styles, theme, responsive layout, and animations
-│   └── main.tsx                   # React entry point and error-boundary mounting
-├── .env.example                   # Documented local environment variables
-├── .gitignore                     # Excludes dependencies, builds, logs, and secrets
-├── index.html                     # Vite HTML shell and metadata
-├── package.json                   # Scripts and dependencies
-├── pnpm-lock.yaml                 # Reproducible dependency resolution
-├── pnpm-workspace.yaml            # pnpm catalog, workspace, and dependency overrides
-├── tsconfig.json                  # TypeScript compiler settings and @ alias
-└── vite.config.ts                 # Vite, Tailwind, base path, and @ alias configuration
+│   │   ├── ui/                         # Reusable Radix-based UI primitives
+│   │   └── error-boundary.tsx          # React render-error fallback
+│   ├── hooks/                          # Reusable React hooks
+│   ├── lib/utils.ts                    # Shared class-name utility
+│   ├── pages/not-found.tsx             # Not-found view
+│   ├── App.tsx                         # Page composition and interactions
+│   ├── index.css                       # Global styles and responsive design
+│   └── main.tsx                        # React application entry point
+├── .env.example                        # Local environment variable reference
+├── .gitignore                          # Ignored local and generated files
+├── index.html                          # HTML shell and document metadata
+├── package.json                         # Scripts and dependency declarations
+├── pnpm-lock.yaml                       # Reproducible dependency resolution
+├── pnpm-workspace.yaml                  # pnpm workspace and dependency policy
+├── tsconfig.json                        # Strict TypeScript configuration
+└── vite.config.ts                       # Vite, Tailwind, and path configuration
 ```
 
-### File-by-file responsibilities
+### Key files
 
-| File or directory | Role | Safe to edit? |
-|---|---|---:|
-| `src/App.tsx` | Page content, sections, navigation, buttons, mission interactions, external links, and displayed contract text | Yes, after reviewing the intended public claims |
-| `src/index.css` | Brand colors, typography, grids, cards, animations, responsive behavior, and visual states | Yes; test mobile and desktop after changes |
-| `src/main.tsx` | Application bootstrap and error boundary | Usually only for application-level concerns |
-| `src/components/ui/` | Generic interface primitives generated around Radix UI patterns | Yes, but keep components reusable and accessible |
-| `src/components/error-boundary.tsx` | Catches render errors and provides a visible fallback | Yes, but preserve useful error reporting |
-| `src/hooks/` | Reusable React state and viewport behavior | Yes, when adding reusable interaction logic |
-| `src/lib/utils.ts` | Shared class-name and utility functions | Yes, but keep it dependency-light |
-| `public/assets/` | Images served without bundling | Yes; optimize large files and use descriptive names |
-| `public/favicon.svg` | Favicon | Replace only with a valid SVG |
-| `public/robots.txt` | Crawler policy | Review before changing indexing behavior |
-| `index.html` | Document metadata and Vite entry shell | Update title, description, social metadata, and asset references here |
-| `vite.config.ts` | Build configuration and GitHub Pages path handling | Preserve the `BASE_PATH` and `@` alias behavior |
-| `tsconfig.json` | TypeScript strictness and source alias resolution | Keep `strict` enabled unless there is a documented reason |
-| `pnpm-workspace.yaml` | Dependency catalog and reproducible overrides | Change only when dependency compatibility is understood |
-| `.github/workflows/deploy-pages.yml` | Installs dependencies, builds `dist/`, and publishes GitHub Pages | Test workflow changes carefully |
-
-## Technology Stack
-
-| Technology | Use in this repository |
+| File | Purpose |
 |---|---|
-| React | Component-based page rendering |
-| TypeScript | Strict type checking |
-| Vite | Development server and production bundling |
-| Tailwind CSS | Utility styling through the Vite plugin |
-| Framer Motion | Motion and reveal interactions |
-| Radix UI | Accessible primitive components |
-| Lucide React | Interface icons |
-| pnpm | Dependency installation and lockfile management |
-| GitHub Actions | Continuous build and deployment |
-| GitHub Pages | Static hosting |
+| `src/App.tsx` | Defines the page sections, navigation, mission demo, token presentation, contract address, and external links. |
+| `src/index.css` | Defines the visual system, layout primitives, responsive behavior, animations, and component states. |
+| `src/main.tsx` | Mounts React and wraps the application with the error boundary. |
+| `vite.config.ts` | Configures Vite, Tailwind, the `@` source alias, and the deployment base path. |
+| `tsconfig.json` | Enables strict TypeScript checks and maps `@/*` to `src/*`. |
+| `pnpm-workspace.yaml` | Defines the workspace, catalog versions, build permissions, and dependency overrides. |
+| `.github/workflows/deploy-pages.yml` | Installs dependencies, runs the production build, uploads `dist/`, and deploys GitHub Pages. |
 
-The exact resolved versions are recorded in `pnpm-lock.yaml`. Use the lockfile rather than manually upgrading individual packages during routine setup.
+## Local development
 
-## Local Development
+### Prerequisites
 
-### Requirements
+- Node.js `22.13.0` or later
+- pnpm `11.24.0`
 
-- Node.js `22.13.0` or newer is recommended because the deployment workflow uses Node 22.
-- pnpm `11.24.0` is the version used by the deployment workflow.
-
-### Install
+Install the project dependencies:
 
 ```bash
 pnpm install
 ```
 
-### Start the development server
+Start the development server:
 
 ```bash
 pnpm dev
 ```
 
-Open <http://localhost:5173/>.
+The local site is available at <http://localhost:5173/>.
 
-### Type check
+Run the type checker:
 
 ```bash
 pnpm run typecheck
 ```
 
-### Build for production
+Create a production build:
 
 ```bash
 pnpm run build
 ```
 
-The optimized static site is written to `dist/`.
-
-### Preview the production build
+The generated files are written to `dist/`. Preview that build locally with:
 
 ```bash
 pnpm run serve
 ```
 
-## GitHub Pages Deployment
+## Deployment
 
-The deployment workflow performs the following steps:
+Deployment is handled by GitHub Actions whenever a commit reaches `main`. The workflow:
 
-1. Checks out the `main` branch.
-2. Installs pnpm `11.24.0` and Node.js `22.13.0`.
-3. Installs dependencies from `pnpm-lock.yaml`.
-4. Builds the application with `BASE_PATH=/TAZZEN-QUACKD-WEBSITE-v1/`.
-5. Uploads the `dist/` directory as a Pages artifact.
-6. Deploys the artifact to the `github-pages` environment.
+1. Checks out the repository.
+2. Installs Node.js `22.13.0` and pnpm `11.24.0`.
+3. Installs from the committed lockfile.
+4. Builds the site with `BASE_PATH=/TAZZEN-QUACKD-WEBSITE-v1/`.
+5. Uploads `dist/` as a Pages artifact.
+6. Publishes the artifact to the `github-pages` environment.
 
-The `BASE_PATH` is essential because this is a project site hosted below the `tazzen.github.io` domain. Without it, JavaScript, CSS, and image paths can point to the domain root and produce a blank page.
+The `BASE_PATH` is required because the site is hosted as a GitHub Pages project site rather than at the domain root. Removing it will cause asset paths to resolve incorrectly and can result in a blank page.
 
-## Content and Claim Governance
+To deploy a change:
 
-Because this website references robotics, artificial intelligence, and a token community, every public claim should be reviewed before it is published.
+```bash
+git checkout main
+git pull --ff-only
+# make and test changes
+pnpm run typecheck
+pnpm run build
+git add .
+git commit -m "Describe the change"
+git push origin main
+```
 
-- Do not claim that the website controls a physical robot unless a real integration exists and has been tested.
-- State clearly that this website supports the QUACKD community meme coin while keeping its relationship to the original robotics repository transparent.
-- Do not publish a wallet private key, seed phrase, API key, or other secret.
-- Treat the displayed contract address as public information, verify it before changing the page, and keep it consistent across the website and documentation.
-- Link technical statements to the original project's documentation rather than presenting this landing page as the source of truth.
-- Mark roadmap items as proposals unless they are already implemented.
-- Check the original repository and the founder's public profile before describing a new update as current.
+Monitor deployments from the [Actions page](https://github.com/TAZZEN/TAZZEN-QUACKD-WEBSITE-v1/actions).
 
-## Original Project and Founder References
+## Content and source policy
 
-The source project is maintained publicly at [`rokbenko/quackd`](https://github.com/rokbenko/quackd). Its README contains the authoritative explanation of the robotics architecture, supported providers, simulator, installation requirements, limitations, safety guidance, roadmap, and contribution process.
+Public copy should be specific, verifiable, and consistent with the project's actual scope.
 
-The founder's public profile is [`@rokbenko`](https://x.com/rokbenko). It is useful for following public build-in-public updates, but social posts should not replace the source repository for technical facts.
+- Describe this repository as the website and community presentation layer.
+- Describe [`rokbenko/quackd`](https://github.com/rokbenko/quackd) as the original robotics software project.
+- Do not present this site as the robotics runtime or claim that it controls a physical robot.
+- Keep the published contract address synchronized across the website and README.
+- Treat the original repository as the source of truth for robotics architecture, supported integrations, installation requirements, limitations, safety, and roadmap.
+- Use the founder's public profile for public updates, not as a substitute for technical documentation.
+- Do not commit private keys, seed phrases, API keys, passwords, or local `.env` files.
 
-## License and Attribution
+The website supports and presents the QUACKD community meme coin. That support is separate from any claim that the original robotics author endorses the token; the two projects should be described accurately and independently.
 
-This website is a separate presentation project. Before distributing it as an open-source package, add the intended license and confirm that all visual assets and copied text are licensed for redistribution.
+## Contributing
 
-The original `quackd` project's license and attribution requirements are defined in its own repository and apply to that project, not automatically to this website. Supporting the QUACKD community meme coin does not by itself claim that the original robotics author endorses the token; the website should describe that relationship accurately.
+Keep pull requests focused and easy to review. Before opening a pull request:
+
+1. Run `pnpm install` if dependency metadata changed.
+2. Run `pnpm run typecheck`.
+3. Run `pnpm run build`.
+4. Check the page at desktop and mobile widths.
+5. Review links, token details, metadata, and deployment paths.
+6. Do not include secrets or generated directories such as `node_modules/` and `dist/`.
+
+Use commit messages that describe the outcome, for example `Clarify token information` or `Improve mobile navigation`.
+
+## Security
+
+If a secret is committed accidentally, revoke it immediately, remove it from the working tree, and review the Git history. Removing a secret from the latest commit does not invalidate an exposed credential.
+
+For security reports, do not open a public issue containing credentials or exploit details. Contact the repository owner privately through the available GitHub account channels.
+
+## Licensing and attribution
+
+This website is a separate project from the original `quackd` repository. Confirm the intended license for this repository before distributing it as an open-source package. The original project's license and attribution requirements are defined in its own repository and do not automatically transfer to this site.
 
 ## References
 
-[1]: https://github.com/rokbenko/quackd "Original quackd open-source robotics project"
-[2]: https://github.com/rokbenko/quackd/blob/main/docs/architecture.md "Original quackd architecture documentation"
-[3]: https://github.com/rokbenko/quackd/blob/main/docs/adr/0017-robot-adapters-and-manifest.md "Original quackd robot adapters and manifest decision"
+[1]: https://github.com/rokbenko/quackd "Original quackd robotics repository"
+[2]: https://github.com/rokbenko/quackd/blob/main/docs/architecture.md "quackd architecture documentation"
+[3]: https://github.com/rokbenko/quackd/blob/main/docs/adr/0017-robot-adapters-and-manifest.md "quackd robot adapter and manifest decision"
 [4]: https://x.com/rokbenko "Rok Benko public profile"
-[5]: https://tazzen.github.io/TAZZEN-QUACKD-WEBSITE-v1/ "Published QUACKD website"
-[6]: https://github.com/TAZZEN/TAZZEN-QUACKD-WEBSITE-v1/actions "QUACKD website deployment workflows"
+[5]: https://tazzen.github.io/TAZZEN-QUACKD-WEBSITE-v1/ "QUACKD production website"
+[6]: https://github.com/TAZZEN/TAZZEN-QUACKD-WEBSITE-v1/actions "QUACKD GitHub Actions workflows"
 
-*Documentation reviewed on 2026-09-05.*
+Documentation reviewed: 2026-09-06.
